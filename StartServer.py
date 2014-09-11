@@ -1,21 +1,30 @@
 #!/usr/bin/env python
 
 # ===== IMPORTS =====
+# standard modules
 import SocketServer
 import socket
 from threading import Thread, Lock
 import sys
-from Beacon import *
 import struct
 import binascii
 from array import array
 import time
-# custom constants
-from Constants import *
+# custom objects
+from inlocclasses import *
 
-# ===== BEACON STRUCTURES =====
-active_beacons = {}
+# ===== Import Parameters =====
+from parameters import constants
+
+# ===== LIST OF ACTIVE USERS =====
 active_users = {}
+
+# ===== LIST OF ACTIVE BEACONS =====
+active_beacons = {}
+# populate active beacons from parameter file
+for b in constants.BEACON_INFORMATION:
+	beacon = Beacon( (b[0],b[1]), b[2], b[3], b[4])
+	print beacon
 
 # ===== CLIENT HANDLER ===== 
 class ClientHandler(SocketServer.BaseRequestHandler):
