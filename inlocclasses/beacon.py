@@ -5,14 +5,15 @@ class Beacon:
 	# variables
 	major = 0
 	minor = 0
-	xy_pos = (0,0)
-	power = 0
+	rssi = 0
+	time = 0
 
-	def __init__(self, pos, major, minor, power):
+	def __init__(self, major, minor, power):
 		self.major = major
 		self.minor = minor
-		self.power = power
-		self.xy_pos = pos
+		self.rssi = power
+		# time this beacon was received
+		self.time = time.time()
 
 	def getMajor(self):
 		return self.major
@@ -20,13 +21,13 @@ class Beacon:
 	def getMinor(self):
 		return self.minor
 
-	def getPower(self):
-		return self.power
+	def getRssi(self):
+		return self.rssi
 
-	def getPos(self):
-		return self.xy_pos
+	def getTime(self):
+		return self.time
 
 	def __str__(self):
-		return "Beacon at (%.1f, %.1f) with Power at (%d), major (%d), and minor (%d)" % \
-				(self.xy_pos[0], self.xy_pos[1], self.power, self.major, self.minor)
+		return "Beacon from major (%d) and minor (%d) with RSSI (%d)" % \
+				(self.major, self.minor, self.rssi)
 

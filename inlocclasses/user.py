@@ -3,7 +3,9 @@ class User:
 	identifier = ''
 	xy_history = []
 	time_history = []
-	MAX_HISTORY_LEN = 64
+	beacon_history = []
+	MAX_EST_HISTORY_LEN = 64
+	MAX_BEACON_HISTORY_LEN = 256
 
 
 	def __init__(self,ident):
@@ -29,9 +31,15 @@ class User:
 		self.xy_history.append(xy_new)
 		self.time_history.append(time)
 
-		if len(self.xy_history) > self.MAX_HISTORY_LEN:
+		if len(self.xy_history) > self.MAX_EST_HISTORY_LEN:
 			self.xy_history.pop()
 			self.time_history.pop()
+
+	def logBeaconRecord(self, beacon):
+		self.beacon_history.append(beacon)
+
+		if len(self.beacon_history) > MAX_BEACON_HISTORY_LEN:
+			self.beacon_history.pop()
 
 
 	def __str__(self):

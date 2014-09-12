@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+# WARNING: PYTHON 3.2 AND GREATER ONLY
+
 # ===== IMPORTS =====
 # standard modules
-import SocketServer
+import socketserver
 import socket
 from threading import Thread, Lock
 import sys
@@ -18,100 +20,64 @@ from constants import communication
 from constants import parameters
 
 # ===== SAY HELLO =====
-print "==============================================="
-print "          iBeacon Localization Server          "
-print "==============================================="
+print("===============================================")
+print("          iBeacon Localization Server          ")
+print("===============================================")
 
-# ===== LIST OF ACTIVE USERS =====
+# ===== LIST OF ACTIVE USERS & BEACONS =====
 active_users = {}
-# ===== LIST OF ACTIVE BEACONS =====
 active_beacons = {}
+
 # populate active beacons from parameter file
 for b in parameters.BEACON_INFORMATION:
-	beacon = Beacon( (b[0],b[1]), b[2], b[3], b[4])
-	print "initializing beacon: " + str(beacon)
+	tx = Transmitter( (b[0],b[1]), b[2], b[3], b[4])
+	print("initializing transmitter: " + str(tx))
 
 # ===== CLIENT HANDLER ===== 
-class ClientHandler(SocketServer.BaseRequestHandler):
-    
-    # function for handling new connections
-    def handle(self):
-        data = 'default'
-        print "Client connected from ", self.client_address
-        while len(data):
-			# parse incoming data
-			data = self.request.recv(1024)
-e			# packets contain at least command type and user id
-			cmd = data[0]
-			uid = data[1]
-			payload = data[2:]
+class ClientHandler(socketserver.BaseRequestHandler):
 
-			# handle command appropriately
-			handleClientCmd(self,cmd,uid,payload)
+	# function for handling new connections
+	def handle(self):
+		# only deal with 
+		print("Client connected from " + str(self.client_address))
+		# parse incoming data
+		data = self.request.recv(1024)
+		# packets contain at least command type and user id
+		cmd = int.from_bytes(data[0], byteorder='big')
+		uid = data[1]
+		payload = data[2:]
 
-        print "Client exited from ", self.client_address
-        self.request.close()
+		# handle command appropriately
+		handleClientCmd(self,cmd,uid,payload)
+
+		print("Client exited from " + self.client_address)
+		self.request.close()
 
 # ===== HANDLE CLIENT COMMANDS =====
 def handleClientCmd(socket, cmd, uid, payload):
-	# is this a beacon?
-	if typ is CMD_TYPE_BEACON:
-		# make sure this beacon is in the active beacons dict
-		if uid not in active_beacons:
-			active_beacons[uid] = Beacon(uid)
-
-		if cmd is CMD_REQUESTKEY:
-			# -- ATOMIC PROCEDURE BEGINS, AQUIRE THREAD LOCK --
-			beacon = active_beacons[uid]
-			socket.request.send( beacon.getCurrentKey() )
-			# -- END ATOMIC PROCEDURE, RELEASE LOCK --
-	
-	# is this a mobile device?
-	if typ is CMD_TYPE_MOBILE:
-		# make sure this user is in the active user dict
-		if uid not in active_users:
-			active_users[uid] = User(uid)
-
-		if cmd is CMD_REQUESTPATHS:
-			print "mobile device requesting paths"
+	# switch on command type
+	if cmd is communication.CMD_CLIENT_SENDBEACON:
+		# client sent a beacon packet to the server
+		major = payload[0:1]
+		minor = payload[0:2]
+	if cmd is communication.CMD_CLIENT_REQUESTPOS:
+		pass
+	if cmd is communication.CMD_CLIENT_REQUESTTRAJ:
+		pass
+		
 
 
 
 
 # ===== THREADED SERVER CLASS =====
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
-
-# ===== THREAD TO CHANGE KEYS =====
-class KeyChanger(Thread):
-	# - variables -
-	delay = 0.500
-	beacons = {}
-
-	def __init__(self,beacons):
-		super(KeyChanger, self).__init__()
-		self.beacons = beacons
-
-
-	def run(self):
-		while 1:
-			# delay
-			time.sleep(self.delay)
-			# cycle all keys
-			for uid in self.beacons:
-				self.beacons[uid].genNextKey()
-
-# ===== FIRE UP KEY CHANGER =====
-keychanger = KeyChanger(active_beacons)
-keychanger.setDaemon(True)
-keychanger.start()
-	
 
 # ===== FIRE UP THE SERVER ON GIVEN PORT =====
 if len(sys.argv) < 2:
-    print 'Usage: python StartServer.py <port_num>'
+    print("Usage: python StartServer.py <port_num>")
 else:
-	print 'Opening Server on port', str(sys.argv[1])
+	print("Opening Server on port " + str(sys.argv[1]))
 	myserver = ThreadedTCPServer(('',int(sys.argv[1])), ClientHandler)
 	myserver.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	myserver.serve_forever()
