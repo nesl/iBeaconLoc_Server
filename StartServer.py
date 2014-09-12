@@ -12,19 +12,24 @@ from array import array
 import time
 # custom objects
 from inlocclasses import *
+# import tcpip commands
+from constants import communication
+# import parameters
+from constants import parameters
 
-# ===== Import Parameters =====
-from parameters import constants
+# ===== SAY HELLO =====
+print "==============================================="
+print "          iBeacon Localization Server          "
+print "==============================================="
 
 # ===== LIST OF ACTIVE USERS =====
 active_users = {}
-
 # ===== LIST OF ACTIVE BEACONS =====
 active_beacons = {}
 # populate active beacons from parameter file
-for b in constants.BEACON_INFORMATION:
+for b in parameters.BEACON_INFORMATION:
 	beacon = Beacon( (b[0],b[1]), b[2], b[3], b[4])
-	print beacon
+	print "initializing beacon: " + str(beacon)
 
 # ===== CLIENT HANDLER ===== 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -36,20 +41,19 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         while len(data):
 			# parse incoming data
 			data = self.request.recv(1024)
-			if len(data) < 2:
-				break
-			# packets are (client type, command, unique ID)
-			typ = data[0]
-			cmd = data[1]
-			uid = data[2]
+e			# packets contain at least command type and user id
+			cmd = data[0]
+			uid = data[1]
+			payload = data[2:]
+
 			# handle command appropriately
-			handleClientCmd(self, typ,cmd,uid)
+			handleClientCmd(self,cmd,uid,payload)
 
         print "Client exited from ", self.client_address
         self.request.close()
 
 # ===== HANDLE CLIENT COMMANDS =====
-def handleClientCmd(socket, typ, cmd, uid):
+def handleClientCmd(socket, cmd, uid, payload):
 	# is this a beacon?
 	if typ is CMD_TYPE_BEACON:
 		# make sure this beacon is in the active beacons dict

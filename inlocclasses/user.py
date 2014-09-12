@@ -1,7 +1,9 @@
 class User:
 	# variables
 	identifier = ''
-	xy_est = (0,0)
+	xy_history = []
+	time_history = []
+	MAX_HISTORY_LEN = 64
 
 
 	def __init__(self,ident):
@@ -11,7 +13,26 @@ class User:
 		return self.identifier
 
 	def getPosEstimate(self):
-		return self.xy_est
+		if len(self.xy_history) == 0:
+			return None
+		return (self.xy_history[-1], self.time_history[-1])
+
+	def getPathEstimate(self, numpoints):
+		if len(self.xy_history) == 0:
+			return None
+		if numpoints >= len(self.xy_history):
+			return (self.xy_history, self.time_history)
+		else:
+			return (self.xy_history[-numpoints:], self.time_history[-numpoints:])
+
+	def addPosEstimate(self, xy_new, time):
+		self.xy_history.append(xy_new)
+		self.time_history.append(time)
+
+		if len(self.xy_history) > self.MAX_HISTORY_LEN:
+			self.xy_history.pop()
+			self.time_history.pop()
+
 
 	def __str__(self):
-		return "User (%d) at (%.1f, %.1f)" % (self.identifier, self.xy_est[0], self.xy_est[1])
+		return "User %s" % (self.identifier)
