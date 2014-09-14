@@ -9,7 +9,6 @@ import socket
 from threading import Thread, Lock
 import sys
 import struct
-import binascii
 from array import array
 import time
 import struct
