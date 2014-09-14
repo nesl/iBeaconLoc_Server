@@ -12,6 +12,9 @@ _How do you start?_
 
 ## Testing
 
-_How do I run the project's automated tests?_
+_How do I run the project's tests?_
+
+1. _Make sure you have netcat installed_
+2. _Run $ echo '01020304050607' | xxd -r -p | nc localhost \<port\_number\>_ to send a dummy beacon report
 
 ## License
