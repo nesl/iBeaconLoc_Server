@@ -28,6 +28,6 @@ class Beacon:
 		return self.time
 
 	def __str__(self):
-		return "Beacon from major (%d) and minor (%d) with RSSI (%d)" % \
-				(self.major, self.minor, self.rssi)
+		return "Beacon from major (%d) and minor (%d) with RSSI (%d) @ t=%f" % \
+				(self.major, self.minor, self.rssi, self.time)
 

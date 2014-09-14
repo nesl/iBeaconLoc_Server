@@ -1,6 +1,6 @@
 class User:
 	# variables
-	identifier = ''
+	uid = -1
 	xy_history = []
 	time_history = []
 	beacon_history = []
@@ -8,10 +8,10 @@ class User:
 	MAX_BEACON_HISTORY_LEN = 256
 
 
-	def __init__(self,ident):
-		self.identifier = ident
+	def __init__(self,uid):
+		self.uid = uid
 
-	def getID(self):
+	def getUid(self):
 		return self.identifier
 
 	def getPosEstimate(self):
@@ -38,9 +38,9 @@ class User:
 	def logBeaconRecord(self, beacon):
 		self.beacon_history.append(beacon)
 
-		if len(self.beacon_history) > MAX_BEACON_HISTORY_LEN:
+		if len(self.beacon_history) > self.MAX_BEACON_HISTORY_LEN:
 			self.beacon_history.pop()
 
 
 	def __str__(self):
-		return "User %s" % (self.identifier)
+		return "User %d" % (self.uid)
