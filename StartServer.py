@@ -13,11 +13,11 @@ from array import array
 import time
 import struct
 # custom objects
-from inlocclasses import *
+from inlocobjects import *
 # import tcpip commands
-from constants import communication
+from inlocconstants import communication
 # import parameters
-from constants import parameters
+from inlocconstants import parameters
 
 # ===== SAY HELLO =====
 print("===============================================")
