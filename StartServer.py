@@ -12,12 +12,13 @@ import struct
 from array import array
 import time
 import struct
+# custom services
+from inlocservices import *
 # custom objects
 from inlocobjects import *
-# import tcpip commands
-from inlocconstants import communication
-# import parameters
+# import constants
 from inlocconstants import parameters
+from inlocconstants import communication
 
 # ===== SAY HELLO =====
 print("===============================================")
@@ -35,7 +36,6 @@ for b in parameters.BEACON_INFORMATION:
 
 # ===== CLIENT HANDLER ===== 
 class ClientHandler(socketserver.BaseRequestHandler):
-
 	# function for handling new connections
 	def handle(self):
 		# only deal with 
@@ -78,21 +78,10 @@ def handleClientCmd(socket, cmd, uid, payload):
 	if cmd is communication.CMD_CLIENT_REQUESTPATH:
 		pass
 		
+# ===== FIRE UP THE SERVER =====
+server = InlocServer(communication.TCPIP_PORT, ClientHandler)
+server.start()
 
-
-
-# ===== THREADED SERVER CLASS =====
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    pass
-
-# ===== FIRE UP THE SERVER ON GIVEN PORT =====
-if len(sys.argv) < 2:
-    print("Usage: python StartServer.py <port_num>")
-else:
-	print("Opening Server on port " + str(sys.argv[1]))
-	myserver = ThreadedTCPServer(('',int(sys.argv[1])), ClientHandler)
-	myserver.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	myserver.serve_forever()
 
 
 
