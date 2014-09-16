@@ -15,6 +15,6 @@ _How do you start?_
 _How do test the server?_
 
 1. _Make sure you have netcat installed_
-2. _Run $ echo '01020304050607' | xxd -r -p | nc localhost \<port\_number\>_ to send a dummy beacon report
+2. _Run any of the shell scripts in the test directory to test your local setup_
 
 ## License
