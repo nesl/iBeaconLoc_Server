@@ -32,5 +32,5 @@ class Transmitter:
 
 	def __str__(self):
 		return "Transmitter at (%.1f, %.1f) with Power at (%d), major (%d), and minor (%d)" % \
-				(self.xy_pos[0], self.xy_pos[1], self.power, self.major, self.minor)
+				(self.xy[0], self.xy[1], self.power, self.major, self.minor)
 

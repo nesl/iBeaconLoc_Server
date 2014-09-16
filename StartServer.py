@@ -50,7 +50,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		# client sent a beacon packet to the server
 		major, minor, rssi, txpow = struct.unpack("!HHBB", payload)
 		# create beacon object
-		beacon = Beacon(major,minor,rssi,txpow)
+		beacon = Beacon(major,minor,-rssi,txpow)
 		print("User " + str(uid) + " sent: " + str(beacon))
 		# make sure we have a record of this user. If not, make a new user with 
 		# a position estimator service
@@ -68,7 +68,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 # ===== PERIODICALLY ESTIMATE POSITIONS =====
 def performEstimation(): 
 	# sleep
-	threading.Timer(0.5, performEstimation).start(); 
+	threading.Timer(1, performEstimation).start(); 
 	# estimate for all users
 	for uid in active_users:
 		active_users[uid].estimateNewPosition()

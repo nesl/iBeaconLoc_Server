@@ -51,6 +51,8 @@ class User:
 		xy_new = self.estimator.getNextEstimate(self)
 		if xy_new is not None:
 			self.addPosEstimate(xy_new)
+			# clear cached beacons
+			self.beacon_cache = []
 
 
 

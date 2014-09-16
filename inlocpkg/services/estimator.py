@@ -24,12 +24,9 @@ class PositionEstimator(object):
 		self.lowpassCoeff = lowpassCoeff
 
 	def getNextEstimate(self, user):
-		print('calculating next estimate...')
 		# if the user's beacon cache is empty, we can't do anything
 		if len(user.beacon_cache) == 0:
-			print('cache empty')
 			return
-		print('cache non-empty')
 		# if the user does have cached beacons, we'll average the ones from the same transmitters
 		observedBeacons = {}
 		for b in user.beacon_cache:
@@ -39,35 +36,27 @@ class PositionEstimator(object):
 			else:
 				# running average of RSSI
 				observedBeacons[MajMin].avgRssi(b.getRssi())
-		print('observed beacon list: ' + str(observedBeacons))
 		# make sure we have enough unique beacons to get a good new estimate
 		if len(observedBeacons) < 3:
 			return
-		print('observed beacons is long enough')
 
+		# our first guess can be the middle of all observed beacons
+		xy_observedBeacons = [self.iBeaconList[(major,minor)].xy for (major,minor) in observedBeacons]
+		xy_guess = (numpy.mean([x for x,y in xy_observedBeacons]), numpy.mean([y for x,y in xy_observedBeacons]))
 		# Now we'll find the instantaneous estimation based on the cached beacon information
-		xy_guess = (0,0)
-		print('starting optimization...')
-		#xy_inst = leastsq(self.lsqrError, xy_guess, args=(0, 0, 0))
+		xy_inst = leastsq(self.lsqrError, xy_guess, args=(observedBeacons))
+		return (xy_inst[0][0], xy_inst[0][1])
 		
-	def lsqrError(self, arguments, observedBeacons):
-		print(' error function entrance ...')
-		distances = []
-		# proposed unknown position
-		xy = arguments
-		print(' proposed xy: ' + str(xy))
+	def lsqrError(self, xy, observedBeacons):
 		# calculate the proposed distances to the beacons
 		proposedBeaconDistances = {(major,minor):self.iBeaconList[(major,minor)].getDistanceTo(xy)\
 									 for (major,minor) in observedBeacons}
-		print(' proposed distance dict: ' + str(proposedBeaconDistances))
 		# calculate the measured distances to the beacons based on RSSI
-		measuredBeaconDistances = {(major,minor):observedBeacons[(major,minor)].getgetDistEst()\
+		measuredBeaconDistances = {(major,minor):observedBeacons[(major,minor)].getDistEst()\
 									for (major,minor) in observedBeacons}
-		print(' measured distance dict: ' + str(measuredBeaconDistances))
 		# calculate difference between measured and proposed distances
-		differences = [proposedBeaconDistances(major,minor)-measuredBeaconDistances(major,minor)\
+		differences = [proposedBeaconDistances[(major,minor)]-measuredBeaconDistances[(major,minor)]\
 									for (major,minor) in observedBeacons]
-		print(' difference between meas and prop = ' + str(differences))
 		return differences
 
 
