@@ -1,5 +1,6 @@
 import os
 import time
+import numpy as np
 
 class Transmitter:
 	# variables
@@ -12,7 +13,7 @@ class Transmitter:
 		self.major = major
 		self.minor = minor
 		self.power = power
-		self.xy_pos = pos
+		self.xy = pos
 
 	def getMajor(self):
 		return self.major
@@ -24,7 +25,10 @@ class Transmitter:
 		return self.power
 
 	def getPos(self):
-		return self.xy_pos
+		return self.xy
+
+	def getDistanceTo(self,xy):
+		return np.sqrt( (xy[0] - self.xy[0])**2 + (xy[1] - self.xy[1])**2 )
 
 	def __str__(self):
 		return "Transmitter at (%.1f, %.1f) with Power at (%d), major (%d), and minor (%d)" % \

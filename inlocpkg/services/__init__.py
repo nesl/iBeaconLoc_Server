@@ -1,3 +1,3 @@
 from .server import InlocServer
-from .estimator import PositionEstimator
+from .estimator import *
 # from interface import UserInterface

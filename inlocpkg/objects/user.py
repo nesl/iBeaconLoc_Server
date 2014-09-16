@@ -1,19 +1,21 @@
 # IMPORTS
-from ..services import *
+import time
 
 class User:
-	# variables
+	# constants
+	MAX_EST_HISTORY_LEN = 64
+	MAX_BEACON_CACHE_LEN = 256
+	# dynamic variables
 	uid = -1
 	xy_history = []
 	time_history = []
-	beacon_history = []
-	MAX_EST_HISTORY_LEN = 64
-	MAX_BEACON_HISTORY_LEN = 256
+	beacon_cache = []
+	estimator = None
 
 
-
-	def __init__(self,uid):
+	def __init__(self,uid,estimator):
 		self.uid = uid
+		self.estimator = estimator
 
 	def getUid(self):
 		return self.identifier
@@ -31,19 +33,25 @@ class User:
 		else:
 			return (self.xy_history[-numpoints:], self.time_history[-numpoints:])
 
-	def addPosEstimate(self, xy_new, time):
+	def logBeaconRecord(self, beacon):
+		self.beacon_cache.append(beacon)
+
+		if len(self.beacon_cache) > self.MAX_BEACON_CACHE_LEN:
+			self.beacon_cache.pop()
+
+	def addPosEstimate(self, xy_new):
 		self.xy_history.append(xy_new)
-		self.time_history.append(time)
+		self.time_history.append(time.time())
 
 		if len(self.xy_history) > self.MAX_EST_HISTORY_LEN:
 			self.xy_history.pop()
 			self.time_history.pop()
 
-	def logBeaconRecord(self, beacon):
-		self.beacon_history.append(beacon)
+	def estimateNewPosition(self):
+		xy_new = self.estimator.getNextEstimate(self)
+		if xy_new is not None:
+			self.addPosEstimate(xy_new)
 
-		if len(self.beacon_history) > self.MAX_BEACON_HISTORY_LEN:
-			self.beacon_history.pop()
 
 
 	def __str__(self):

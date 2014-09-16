@@ -7,6 +7,7 @@
 import socketserver
 import socket
 from threading import Thread, Lock
+import threading
 import sys
 import struct
 from array import array
@@ -46,16 +47,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		cmd = data[0]
 		uid = data[1]
 		payload = data[2:]
-
 		# handle command appropriately
 		self.inlocCmdHandler(self,cmd,uid,payload)
-
 		#print("Client exited from " + str(self.client_address))
 		self.request.close()
 
 
 # ===== HIGH LEVEL SERVER =====
-class InlocServer():
+class InlocServer(threading.Thread):
 	port = None
 	threadedServer = None
 
@@ -64,7 +63,7 @@ class InlocServer():
 		self.threadedServer = ThreadedTCPServer(cmdHandler, ('',self.port), ClientHandler)
 		self.threadedServer.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-	def start(self):
+	def run(self):
 		self.threadedServer.serve_forever()
 
 
