@@ -22,8 +22,8 @@ class User:
 
 	def getPosEstimate(self):
 		if len(self.xy_history) == 0:
-			return None
-		return (self.xy_history[-1], self.time_history[-1])
+			return (0.0,0.0)
+		return self.xy_history[-1]
 
 	def getPathEstimate(self, numpoints):
 		if len(self.xy_history) == 0:

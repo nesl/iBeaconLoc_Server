@@ -42,7 +42,6 @@ for b in parameters.BEACON_INFORMATION:
 # ===== HANDLE CLIENT COMMANDS =====
 def handleClientCmd(socket, cmd, uid, payload):
 	# switch on command type
-
 	if cmd is communication.CMD_CLIENT_SENDBEACON:
 		if len(payload) is not communication.CMD_CLIENT_SENDBEACON_PAYLOAD:
 			# malformed packet
@@ -61,7 +60,15 @@ def handleClientCmd(socket, cmd, uid, payload):
 		active_users[uid].logBeaconRecord(beacon)
 
 	if cmd is communication.CMD_CLIENT_REQUESTPOS:
-		pass
+		# find the latest estimate of this user (default is 0,0)
+		xy_latest = (0.0,0.0)
+		if uid in active_users:
+			xy_latest = active_users[uid].getPosEstimate()
+		# send latest xy to user
+		print("User " + str(uid) + " requesting pos., sending: " + str(xy_latest))
+		response = struct.pack("!ff", xy_latest[0], xy_latest[1])
+		socket.request.sendall(response)
+
 	if cmd is communication.CMD_CLIENT_REQUESTPATH:
 		pass
 		
