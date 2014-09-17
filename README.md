@@ -12,9 +12,10 @@ _How do you start?_
 
 ## Testing
 
-_How do test the server?_
+_How do I test the server?_
 
 1. _Make sure you have netcat installed_
 2. _Run any of the shell scripts in the test directory to test your local setup_
+3. _Modify iBeacon information as needed in the constants/parameters.py file_
 
 ## License
