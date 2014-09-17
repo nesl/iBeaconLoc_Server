@@ -62,6 +62,8 @@ class InlocServer(threading.Thread):
 		self.port = port
 		self.threadedServer = ThreadedTCPServer(cmdHandler, ('',self.port), ClientHandler)
 		self.threadedServer.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		# initialize super thread
+		super(InlocServer,self).__init__()
 
 	def run(self):
 		self.threadedServer.serve_forever()

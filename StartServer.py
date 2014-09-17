@@ -39,6 +39,10 @@ for b in parameters.BEACON_INFORMATION:
 	print("initializing transmitter: " + str(tx))
 	active_ibeacons[(major, minor)] = tx
 
+# user interface and server objects
+server = None
+ui = None
+
 # ===== HANDLE CLIENT COMMANDS =====
 def handleClientCmd(socket, cmd, uid, payload):
 	# switch on command type
@@ -56,6 +60,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		if uid not in active_users:
 			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=0, lowpassCoeff=0)
 			active_users[uid] = User(uid, posEstimator)
+			ui.addUser(active_users[uid], "images/user_01.png")
 		# pass beacon to user object
 		active_users[uid].logBeaconRecord(beacon)
 
@@ -70,6 +75,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		socket.request.sendall(response)
 
 	if cmd is communication.CMD_CLIENT_REQUESTPATH:
+		# currently unhandled
 		pass
 		
 # ===== PERIODICALLY ESTIMATE POSITIONS =====
@@ -80,16 +86,13 @@ def performEstimation():
 	for uid in active_users:
 		active_users[uid].estimateNewPosition()
 
+# ===== FIRE UP THE SERVER =====
+server = InlocServer(communication.TCPIP_PORT, handleClientCmd)
+server.start()
+
 # ===== FIRE UP THE ESTIMATOR =====
 performEstimation()
 
-# ===== FIRE UP THE SERVER =====
-server = InlocServer(communication.TCPIP_PORT, handleClientCmd)
-server.run()
-
-
-
-
-
-
-
+# ===== FIRE UP THE GUI =====
+ui = UserInterface(parameters.UI_WIDTH, parameters.UI_HEIGHT, "images/background.jpg")
+ui.start()
