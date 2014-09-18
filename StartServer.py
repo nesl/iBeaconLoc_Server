@@ -52,7 +52,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		if len(payload) is not communication.CMD_CLIENT_SENDBEACON_PAYLOAD:
 			return
 		# client sent a beacon packet to the server
-		major, minor, rssi, txpow = struct.unpack("!HHBB", payload)
+		major, minor, rssi, txpow = struct.unpack("!hhbb", payload)
 		# create beacon object
 		beacon = Beacon(major,minor,-rssi,txpow)
 		print("User " + str(uid) + " sent: " + str(beacon))

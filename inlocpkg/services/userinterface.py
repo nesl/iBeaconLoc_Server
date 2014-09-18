@@ -14,7 +14,7 @@ class UserInterface(threading.Thread):
         pygame.font.init()
         self.smallfont = pygame.font.SysFont("helvetica",24)
         self.mediumfont = pygame.font.SysFont("helvetica",28)
-        self.largefont = pygame.font.SysFont("helvetica", 34)
+        self.largefont = pygame.font.SysFont("helvetica", 38)
         self.largefont.set_italic(True)
         self.mediumfont.set_bold(True)
         self.screenW=screenSize[0]
@@ -48,6 +48,8 @@ class UserInterface(threading.Thread):
         self.mapFrameRect = (self.statsFrameRect[2], self.statsFrameRect[1], self.screenW, self.screenH)
         self.frameBgColor = (255,255,255)
         self.fontColor = (0,0,0)
+        self.user1Color = (0,0,255)
+        self.user2Color = (255,0,0)
 
 
         # --- background ---
@@ -127,38 +129,81 @@ class UserInterface(threading.Thread):
         # --- draw title frame ---
         temp_str = "BuildSys 2014: An iBeacon Localization Primer"
         temp_mod = self.largefont.render(temp_str, True, (0,0,0))
-        self.screen.blit(temp_mod, (round(self.screenW/2)-300, 20) )
+        self.screen.blit(temp_mod, (round(self.screenW/2)-400, 20) )
 
         # --- draw reception statistics frame ---
         temp_str = "Reception Statistics"
         temp_mod = self.mediumfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (10, self.statsFrameRect[1]) )
-        temp_str = "User 1 PPS:"
+        temp_str = "User 1"
+        temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
+        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 40))
+        temp_str = "User 2"
+        temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
+        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 40))
+        temp_str = "PPS"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 30))
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 70))
         if 1 not in self.managed_users:
             temp_str = "n/a"
         else:
             pps = self.managed_users[1].getPacketsPerSec()
             temp_str = "{:.1f}".format(pps) 
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (200, self.statsFrameRect[1] + 30))
-
-        temp_str = "User 2 PPS:"
-        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 60))
+        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 70))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
             pps = self.managed_users[2].getPacketsPerSec()
             temp_str = "{:.1f}".format(pps) 
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (200, self.statsFrameRect[1] + 60))
+        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 70))
 
-        # --- draw beacon statistics frame ---
-        temp_str = "Beacon Statistics"
+        # --- draw user preferences frame ---
+        temp_str = "User Settings"
         temp_mod = self.mediumfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 200) )
+        self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 160) )
+        temp_str = "User 1"
+        temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
+        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 200))
+        temp_str = "User 2"
+        temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
+        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 200))
+        temp_str = "Power"
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 230))
+        if 1 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            power = self.managed_users[1].getPowerFilter()
+            temp_str = str(power)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 230))
+        if 2 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            pps = self.managed_users[2].getPowerFilter()
+            temp_str = str(power)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 230))
+
+        temp_str = "Rate"
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 260))
+        if 1 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            rate = self.managed_users[1].getRateThrottle()
+            temp_str = str(rate)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 260))
+        if 2 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            rate = self.managed_users[2].getRateThrottle()
+            temp_str = str(rate)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 260))
 
         # --- draw map frame ---        
         # draw background
