@@ -4,12 +4,8 @@
 
 # ===== IMPORTS =====
 # standard modules
-import socketserver
-import socket
-from threading import Thread, Lock
 import threading
 import sys
-import struct
 from array import array
 import time
 import struct
