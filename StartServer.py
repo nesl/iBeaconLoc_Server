@@ -60,7 +60,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		if uid not in active_users:
 			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=0, lowpassCoeff=0)
 			active_users[uid] = User(uid, posEstimator)
-			ui.addUser(active_users[uid], "images/user_01.png")
+			ui.addUser(uid, "images/user_01.png")
 		# pass beacon to user object
 		active_users[uid].logBeaconRecord(beacon)
 
@@ -85,6 +85,7 @@ def performEstimation():
 	# estimate for all users
 	for uid in active_users:
 		active_users[uid].estimateNewPosition()
+		ui.moveUserMeters( uid, active_users[uid].getPosEstimate() )
 
 # ===== FIRE UP THE SERVER =====
 server = InlocServer(communication.TCPIP_PORT, handleClientCmd)
@@ -94,5 +95,7 @@ server.start()
 performEstimation()
 
 # ===== FIRE UP THE GUI =====
-ui = UserInterface(parameters.UI_WIDTH, parameters.UI_HEIGHT, "images/background.jpg")
+ui = UserInterface(parameters.UI_WIDTH_PX, parameters.UI_HEIGHT_PX,\
+					parameters.UI_MAP_WIDTH_METERS, parameters.UI_MAP_HEIGHT_METERS,\
+					"images/background.png")
 ui.start()

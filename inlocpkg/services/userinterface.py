@@ -7,23 +7,53 @@ import threading
 
 class UserInterface(threading.Thread):
 
-    def __init__(self, screenW, screenH, bgimg):
+    def __init__(self, screenW, screenH, mapWidthM, mapHeightM, bgimg):
         # --- initialize game ---
         pygame.init()
         pygame.display.set_caption('BuildSys 2014: iBeacon Localization Primer')
         pygame.font.init()
+        self.smallfont = pygame.font.Font(pygame.font.get_default_font(),14)
         self.mediumfont = pygame.font.Font(pygame.font.get_default_font(),18)
+        self.largefont = pygame.font.Font(pygame.font.get_default_font(), 24)
         self.screenW=screenW
         self.screenH=screenH
+        self.mapWidthM = mapWidthM
+        self.mapHeightM = mapHeightM
         self.screen=pygame.display.set_mode((screenW,screenH))
 
+        # calculate ui borders, the layout is something like this:
+        #
+        #        _________________________________
+        #       |___________TITLE BAR____________|   (title %)
+        #       |          |                     |       of
+        #       |          |                     |       |
+        #       |          |                     |       |
+        #       |          |                     |       |
+        #       |  STATS   |         MAP         |       |
+        #       |          |                     |       |
+        #       |          |                     |       |
+        #       |          |                     |       |
+        #       |__________|_____________________|       v
+        #
+        #         (stats %)   of ---------------->
+
+        self.titleFramePerc = 0.10
+        self.statsFramePerc = 0.33
+        self.titleFrameRect = (0,0,round(self.titleFramePerc*self.screenH), self.screenW)
+        self.statsFrameRect = (0, round(self.titleFramePerc*self.screenH),round(self.statsFramePerc*self.screenW),self.screenH)
+        self.mapFrameRect = (self.statsFrameRect[2], self.statsFrameRect[1], self.screenW, self.screenH)
+        self.frameBgColor = (255,255,255)
+
+
         # --- background ---
-        bgimg=pygame.image.load (bgimg).convert()
-        self.background=pygame.transform.scale (bgimg,(screenW,screenH))
+        bgimg=pygame.image.load(bgimg).convert()
+        self.mapWidthPx = round( (1.0 - self.statsFramePerc)*self.screenW )
+        self.mapHeightPx = round( (1.0 - self.titleFramePerc)*self.screenH )
+        self.background=pygame.transform.scale (bgimg,(self.mapWidthPx,self.mapHeightPx))
 
         # --- misc. variables ---
         self.num_users = 0
-        self.sprite_list = []
+        self.user_list = {}
 
         # -- game state --
         self.running = True
@@ -47,36 +77,64 @@ class UserInterface(threading.Thread):
                     self.running=False
                     break
 
-            self.draw_frame(self.sprite_list)
-            self.update_sprites()
+            self.draw_frame(self.user_list)
 
         pygame.quit()
 
     def quit(self):
         self.running = False
 
-    def addUser(self, user, impath):
+    def addUser(self, uid, impath):
         self.num_users += 1
-        self.sprite_list.append( self.UserSprite(user, impath) )
+        if uid in self.user_list:
+            print("warning: attempted to add existing uid to UI user list")
+        else:
+            self.user_list[uid] = self.UserSprite(uid,impath)
+
+    def moveUserMeters(self, uid, mxy):
+        if uid not in self.user_list:
+            print("warning: attempted to move a uid not found in UI user list")
+        else:
+            self.user_list[uid].setPosition(self.userCoordsToPx(mxy))
+
+    def userCoordsToPx(self, mxy):
+        # x between 0 and screenW-1
+        dpx = max(0, min(self.mapWidthPx*mxy[0]/self.mapWidthM, self.screenW) )
+        # y between 0 and screenH-1
+        dpy = max(0, min(self.mapHeightPx*mxy[1]/self.mapHeightM, self.screenH) )
+        # account for weird x,y coordinates in ui
+        px = self.mapFrameRect[0] + dpx
+        py = self.screenH - dpy
+        return (px,py)
+
 
     def draw_frame(self, alist):
 
         # draw background
-        pygame.draw.rect(self.screen,(0,0,0),self.screen.get_rect())
-        self.screen.blit(self.background,(0,0))
+        pygame.draw.rect(self.screen, self.frameBgColor, self.screen.get_rect())
+
+        # --- draw title frame ---
+        title_str = "BuildSys 2014: An iBeacon Localization Primer"
+        title = self.largefont.render(title_str, True, (0,0,0))
+        self.screen.blit(title, (round(self.screenW/2)-300, 10) )
+
+        # --- draw stats frame ---
+        stats_str = "Statistics"
+        stats = self.mediumfont.render(stats_str, True, (0,0,0))
+        self.screen.blit(stats, (10, self.statsFrameRect[1]) )
+
+        # --- draw map frame ---        
+        # draw background
+        self.screen.blit(self.background,self.mapFrameRect[0:2])
 
         # draw users
-        for user in self.sprite_list:
-            self.screen.blit(user.image, user.xy)
+        for uid in self.user_list:
+            self.screen.blit(self.user_list[uid].image, self.user_list[uid].xy)
 
         # draw user statistics
         # packets per second
 
         pygame.display.flip()
-
-    def update_sprites(self):
-        for sprite in self.sprite_list:
-                sprite.update()
 
     # =============== SPRITE CLASSES ================
     # --- RECTANGLE CLASS FOR COLLISION DETECTION ---
@@ -105,10 +163,10 @@ class UserInterface(threading.Thread):
 
     # --- USER SPRITE CLASS ---
     class UserSprite(Sprite):
-        def __init__(self,user,img):
-            self.user = user
+        def __init__(self,uid,img):
             self.img = img
-            self.description = 'User ' + str(user.uid)
+            self.uid = uid
+            self.description = 'User ' + str(self.uid)
             super(UserInterface.UserSprite, self).__init__(img)
             self.image=pygame.transform.scale(self.image, (32, 32))
 
