@@ -7,19 +7,22 @@ import threading
 
 class UserInterface(threading.Thread):
 
-    def __init__(self, screenSize, mapSizeM, bgimg, transmitters):
+    def __init__(self, screenSize, mapSizeM, transmitters, users, bgimg):
         # --- initialize game ---
         pygame.init()
         pygame.display.set_caption('BuildSys 2014: iBeacon Localization Primer')
         pygame.font.init()
-        self.smallfont = pygame.font.Font(pygame.font.get_default_font(),14)
-        self.mediumfont = pygame.font.Font(None,32)
-        self.largefont = pygame.font.Font(None, 44)
+        self.smallfont = pygame.font.SysFont("helvetica",24)
+        self.mediumfont = pygame.font.SysFont("helvetica",28)
+        self.largefont = pygame.font.SysFont("helvetica", 34)
+        self.largefont.set_italic(True)
+        self.mediumfont.set_bold(True)
         self.screenW=screenSize[0]
         self.screenH=screenSize[1]
         self.mapWidthM = mapSizeM[0]
         self.mapHeightM = mapSizeM[1]
-        self.transmitters = transmitters
+        self.managed_transmitters = transmitters
+        self.managed_users = users
         self.screen=pygame.display.set_mode((self.screenW,self.screenH))
 
         # calculate ui borders, the layout is something like this:
@@ -44,6 +47,7 @@ class UserInterface(threading.Thread):
         self.statsFrameRect = (0, round(self.titleFramePerc*self.screenH),round(self.statsFramePerc*self.screenW),self.screenH)
         self.mapFrameRect = (self.statsFrameRect[2], self.statsFrameRect[1], self.screenW, self.screenH)
         self.frameBgColor = (255,255,255)
+        self.fontColor = (0,0,0)
 
 
         # --- background ---
@@ -53,9 +57,8 @@ class UserInterface(threading.Thread):
         self.background=pygame.transform.scale (bgimg,(self.mapWidthPx,self.mapHeightPx))
 
         # --- misc. variables ---
-        self.num_users = 0
-        self.user_list = {}
-        self.transmitter_list = {}
+        self.user_sprite_list = {}
+        self.transmitter_sprite_list = {}
 
         # -- game state --
         self.running = True
@@ -79,7 +82,7 @@ class UserInterface(threading.Thread):
                     self.running=False
                     break
 
-            self.draw_frame(self.user_list)
+            self.draw_frame(self.user_sprite_list)
 
         pygame.quit()
 
@@ -87,24 +90,23 @@ class UserInterface(threading.Thread):
         self.running = False
 
     def addUser(self, uid, impath):
-        self.num_users += 1
-        if uid in self.user_list:
+        if uid in self.user_sprite_list:
             print("warning: attempted to add existing uid to UI list")
         else:
-            self.user_list[uid] = self.UserSprite(uid,impath)
+            self.user_sprite_list[uid] = self.UserSprite(uid,impath)
 
     def addTransmitter(self, major, minor, mxy, impath):
-        if (major,minor) in self.transmitter_list:
+        if (major,minor) in self.transmitter_sprite_list:
             print("warning: attempted to add existing transmitter to UI list")
         else:
             pxy = self.userCoordsToPx(mxy)
-            self.transmitter_list[(major,minor)] = self.TransmitterSprite(pxy, major, minor, impath)
+            self.transmitter_sprite_list[(major,minor)] = self.TransmitterSprite(pxy, major, minor, impath)
 
     def moveUserMeters(self, uid, mxy):
-        if uid not in self.user_list:
+        if uid not in self.user_sprite_list:
             print("warning: attempted to move a uid not found in UI user list")
         else:
-            self.user_list[uid].setPosition(self.userCoordsToPx(mxy))
+            self.user_sprite_list[uid].setPosition(self.userCoordsToPx(mxy))
 
     def userCoordsToPx(self, mxy):
         # x between 0 and screenW-1
@@ -123,31 +125,52 @@ class UserInterface(threading.Thread):
         pygame.draw.rect(self.screen, self.frameBgColor, self.screen.get_rect())
 
         # --- draw title frame ---
-        title_str = "BuildSys 2014: An iBeacon Localization Primer"
-        title = self.largefont.render(title_str, True, (0,0,0))
-        self.screen.blit(title, (round(self.screenW/2)-300, 20) )
+        temp_str = "BuildSys 2014: An iBeacon Localization Primer"
+        temp_mod = self.largefont.render(temp_str, True, (0,0,0))
+        self.screen.blit(temp_mod, (round(self.screenW/2)-300, 20) )
 
         # --- draw reception statistics frame ---
-        stats_str = "Reception Statistics"
-        stats = self.mediumfont.render(stats_str, True, (0,0,0))
-        self.screen.blit(stats, (10, self.statsFrameRect[1]) )
+        temp_str = "Reception Statistics"
+        temp_mod = self.mediumfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (10, self.statsFrameRect[1]) )
+        temp_str = "User 1 PPS:"
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 30))
+        if 1 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            pps = self.managed_users[1].getPacketsPerSec()
+            temp_str = "{:.1f}".format(pps) 
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (200, self.statsFrameRect[1] + 30))
+
+        temp_str = "User 2 PPS:"
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 60))
+        if 2 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            pps = self.managed_users[2].getPacketsPerSec()
+            temp_str = "{:.1f}".format(pps) 
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (200, self.statsFrameRect[1] + 60))
 
         # --- draw beacon statistics frame ---
-        stats_str = "Beacon Statistics"
-        stats = self.mediumfont.render(stats_str, True, (0,0,0))
-        self.screen.blit(stats, (10, self.statsFrameRect[1] + 200) )
+        temp_str = "Beacon Statistics"
+        temp_mod = self.mediumfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 200) )
 
         # --- draw map frame ---        
         # draw background
         self.screen.blit(self.background,self.mapFrameRect[0:2])
 
         # draw transmitters
-        for MajMin in self.transmitter_list:
-            self.screen.blit(self.transmitter_list[MajMin].image, self.transmitter_list[MajMin].xy)
+        for MajMin in self.transmitter_sprite_list:
+            self.screen.blit(self.transmitter_sprite_list[MajMin].image, self.transmitter_sprite_list[MajMin].xy)
 
         # draw users
-        for uid in self.user_list:
-            self.screen.blit(self.user_list[uid].image, self.user_list[uid].xy)
+        for uid in self.user_sprite_list:
+            self.screen.blit(self.user_sprite_list[uid].image, self.user_sprite_list[uid].xy)
 
         # draw user statistics
         # packets per second

@@ -110,7 +110,7 @@ performEstimation()
 
 # ===== FIRE UP THE GUI =====
 ui = UserInterface(parameters.UI_MONITORSIZE, parameters.UI_MAPSIZE,\
-			"images/background.png", active_ibeacons)
+			active_ibeacons, active_users, "images/background.png")
 # add in the transmitters
 for MajMin in active_ibeacons:
 	b = active_ibeacons[MajMin]

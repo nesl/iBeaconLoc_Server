@@ -14,11 +14,14 @@ class User:
 	# mobile-based filters
 	powerFilter = 0
 	rateThrottle = 0
-
+	# reception statistics
+	packetsPerSec = 0
+	lastEstimateTime = 0
 
 	def __init__(self,uid,estimator):
 		self.uid = uid
 		self.estimator = estimator
+		self.lastEstimateTime = time.time()
 
 	def getUid(self):
 		return self.identifier
@@ -51,11 +54,15 @@ class User:
 			self.time_history.pop()
 
 	def estimateNewPosition(self):
+		timeSinceLastEst = time.time() - self.lastEstimateTime
 		xy_new = self.estimator.getNextEstimate(self)
 		if xy_new is not None:
 			self.addPosEstimate(xy_new)
-			# clear cached beacons
-			self.beacon_cache = []
+		# update packets per sec stat
+		self.packetsPerSec = len(self.beacon_cache)/timeSinceLastEst
+		# clear cached beacons
+		self.beacon_cache = []
+		self.lastEstimateTime = time.time()
 
 	def setPowerFilter(self, power):
 		self.powerFilter = power
@@ -68,6 +75,9 @@ class User:
 
 	def getRateThrottle(self):
 		return self.rateThrottle
+
+	def getPacketsPerSec(self):
+		return self.packetsPerSec
 
 
 	def __str__(self):
