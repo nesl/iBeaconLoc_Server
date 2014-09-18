@@ -7,19 +7,20 @@ import threading
 
 class UserInterface(threading.Thread):
 
-    def __init__(self, screenW, screenH, mapWidthM, mapHeightM, bgimg):
+    def __init__(self, screenSize, mapSizeM, bgimg, transmitters):
         # --- initialize game ---
         pygame.init()
         pygame.display.set_caption('BuildSys 2014: iBeacon Localization Primer')
         pygame.font.init()
         self.smallfont = pygame.font.Font(pygame.font.get_default_font(),14)
-        self.mediumfont = pygame.font.Font(pygame.font.get_default_font(),18)
-        self.largefont = pygame.font.Font(pygame.font.get_default_font(), 24)
-        self.screenW=screenW
-        self.screenH=screenH
-        self.mapWidthM = mapWidthM
-        self.mapHeightM = mapHeightM
-        self.screen=pygame.display.set_mode((screenW,screenH))
+        self.mediumfont = pygame.font.Font(None,32)
+        self.largefont = pygame.font.Font(None, 44)
+        self.screenW=screenSize[0]
+        self.screenH=screenSize[1]
+        self.mapWidthM = mapSizeM[0]
+        self.mapHeightM = mapSizeM[1]
+        self.transmitters = transmitters
+        self.screen=pygame.display.set_mode((self.screenW,self.screenH))
 
         # calculate ui borders, the layout is something like this:
         #
@@ -37,7 +38,7 @@ class UserInterface(threading.Thread):
         #
         #         (stats %)   of ---------------->
 
-        self.titleFramePerc = 0.10
+        self.titleFramePerc = 0.15
         self.statsFramePerc = 0.33
         self.titleFrameRect = (0,0,round(self.titleFramePerc*self.screenH), self.screenW)
         self.statsFrameRect = (0, round(self.titleFramePerc*self.screenH),round(self.statsFramePerc*self.screenW),self.screenH)
@@ -54,6 +55,7 @@ class UserInterface(threading.Thread):
         # --- misc. variables ---
         self.num_users = 0
         self.user_list = {}
+        self.transmitter_list = {}
 
         # -- game state --
         self.running = True
@@ -87,9 +89,16 @@ class UserInterface(threading.Thread):
     def addUser(self, uid, impath):
         self.num_users += 1
         if uid in self.user_list:
-            print("warning: attempted to add existing uid to UI user list")
+            print("warning: attempted to add existing uid to UI list")
         else:
             self.user_list[uid] = self.UserSprite(uid,impath)
+
+    def addTransmitter(self, major, minor, mxy, impath):
+        if (major,minor) in self.transmitter_list:
+            print("warning: attempted to add existing transmitter to UI list")
+        else:
+            pxy = self.userCoordsToPx(mxy)
+            self.transmitter_list[(major,minor)] = self.TransmitterSprite(pxy, major, minor, impath)
 
     def moveUserMeters(self, uid, mxy):
         if uid not in self.user_list:
@@ -99,9 +108,9 @@ class UserInterface(threading.Thread):
 
     def userCoordsToPx(self, mxy):
         # x between 0 and screenW-1
-        dpx = max(0, min(self.mapWidthPx*mxy[0]/self.mapWidthM, self.screenW) )
+        dpx = round( max(0, min(self.mapWidthPx*mxy[0]/self.mapWidthM, self.screenW) ))
         # y between 0 and screenH-1
-        dpy = max(0, min(self.mapHeightPx*mxy[1]/self.mapHeightM, self.screenH) )
+        dpy = round( max(0, min(self.mapHeightPx*mxy[1]/self.mapHeightM, self.screenH) ))
         # account for weird x,y coordinates in ui
         px = self.mapFrameRect[0] + dpx
         py = self.screenH - dpy
@@ -116,16 +125,25 @@ class UserInterface(threading.Thread):
         # --- draw title frame ---
         title_str = "BuildSys 2014: An iBeacon Localization Primer"
         title = self.largefont.render(title_str, True, (0,0,0))
-        self.screen.blit(title, (round(self.screenW/2)-300, 10) )
+        self.screen.blit(title, (round(self.screenW/2)-300, 20) )
 
-        # --- draw stats frame ---
-        stats_str = "Statistics"
+        # --- draw reception statistics frame ---
+        stats_str = "Reception Statistics"
         stats = self.mediumfont.render(stats_str, True, (0,0,0))
         self.screen.blit(stats, (10, self.statsFrameRect[1]) )
+
+        # --- draw beacon statistics frame ---
+        stats_str = "Beacon Statistics"
+        stats = self.mediumfont.render(stats_str, True, (0,0,0))
+        self.screen.blit(stats, (10, self.statsFrameRect[1] + 200) )
 
         # --- draw map frame ---        
         # draw background
         self.screen.blit(self.background,self.mapFrameRect[0:2])
+
+        # draw transmitters
+        for MajMin in self.transmitter_list:
+            self.screen.blit(self.transmitter_list[MajMin].image, self.transmitter_list[MajMin].xy)
 
         # draw users
         for uid in self.user_list:
@@ -156,22 +174,32 @@ class UserInterface(threading.Thread):
             self.image=pygame.transform.scale(self.image,(30,30))
             self.width=32
             self.height=32
-            self.description='generic'
         def setPosition(self, xy):
             self.xy = xy
 
 
-    # --- USER SPRITE CLASS ---
+    # --- USER SPRITE ---
     class UserSprite(Sprite):
         def __init__(self,uid,img):
             self.img = img
             self.uid = uid
-            self.description = 'User ' + str(self.uid)
             super(UserInterface.UserSprite, self).__init__(img)
             self.image=pygame.transform.scale(self.image, (32, 32))
 
         def update(self):
             pass
 
+    # --- TRANSMITTER SPRITE ---
+    class TransmitterSprite(Sprite):
+        def __init__(self, xy, major, minor, img):
+            super(UserInterface.TransmitterSprite, self).__init__(img)      
+            self.img = img
+            self.major = major
+            self.minor = minor
+            self.image=pygame.transform.scale(self.image, (24, 24))
+            self.xy = xy
+
+        def update(self):
+            pass
 
 

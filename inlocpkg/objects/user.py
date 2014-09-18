@@ -11,6 +11,9 @@ class User:
 	time_history = []
 	beacon_cache = []
 	estimator = None
+	# mobile-based filters
+	powerFilter = 0
+	rateThrottle = 0
 
 
 	def __init__(self,uid,estimator):
@@ -54,6 +57,17 @@ class User:
 			# clear cached beacons
 			self.beacon_cache = []
 
+	def setPowerFilter(self, power):
+		self.powerFilter = power
+
+	def setRateThrottle(self, rate):
+		self.rateThrottle = rate
+
+	def getPowerFilter(self):
+		return self.powerFilter
+
+	def getRateThrottle(self):
+		return self.rateThrottle
 
 
 	def __str__(self):

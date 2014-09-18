@@ -41,10 +41,15 @@ ui = None
 
 # ===== HANDLE CLIENT COMMANDS =====
 def handleClientCmd(socket, cmd, uid, payload):
+	# ensure we have this user in our list
+	if uid not in active_users:
+			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=0, lowpassCoeff=0)
+			active_users[uid] = User(uid, posEstimator)
+			ui.addUser(uid, "images/user_01.png")
+
 	# switch on command type
 	if cmd is communication.CMD_CLIENT_SENDBEACON:
 		if len(payload) is not communication.CMD_CLIENT_SENDBEACON_PAYLOAD:
-			# malformed packet
 			return
 		# client sent a beacon packet to the server
 		major, minor, rssi, txpow = struct.unpack("!HHBB", payload)
@@ -53,14 +58,13 @@ def handleClientCmd(socket, cmd, uid, payload):
 		print("User " + str(uid) + " sent: " + str(beacon))
 		# make sure we have a record of this user. If not, make a new user with 
 		# a position estimator service
-		if uid not in active_users:
-			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=0, lowpassCoeff=0)
-			active_users[uid] = User(uid, posEstimator)
-			ui.addUser(uid, "images/user_01.png")
+		
 		# pass beacon to user object
 		active_users[uid].logBeaconRecord(beacon)
 
 	if cmd is communication.CMD_CLIENT_REQUESTPOS:
+		if len(payload) is not communication.CMD_CLIENT_REQUESTPOS_PAYLOAD:
+			return
 		# find the latest estimate of this user (default is 0,0)
 		xy_latest = (0.0,0.0)
 		if uid in active_users:
@@ -73,11 +77,25 @@ def handleClientCmd(socket, cmd, uid, payload):
 	if cmd is communication.CMD_CLIENT_REQUESTPATH:
 		# currently unhandled
 		pass
+
+	if cmd is communication.CMD_CLIENT_SENDPOWER:
+		if len(payload) is not communication.CMD_CLIENT_SENDPOWER_PAYLOAD:
+			return
+		power = -struct.unpack("!B", payload)[0]
+		active_users[uid].setPowerFilter(power)
+		print("User " + str(uid) + " set power to " + str(power))
+
+	if cmd is communication.CMD_CLIENT_SENDRATE:
+		if len(payload) is not communication.CMD_CLIENT_SENDRATE_PAYLOAD:
+			return
+		rate = struct.unpack("!B", payload)[0]
+		active_users[uid].setRateThrottle(rate)
+		print("User " + str(uid) + " set rate to " + str(rate))
 		
 # ===== PERIODICALLY ESTIMATE POSITIONS =====
 def performEstimation(): 
 	# sleep
-	threading.Timer(1, performEstimation).start(); 
+	threading.Timer(parameters.ESTIMATION_PERIOD, performEstimation).start(); 
 	# estimate for all users
 	for uid in active_users:
 		active_users[uid].estimateNewPosition()
@@ -91,7 +109,10 @@ server.start()
 performEstimation()
 
 # ===== FIRE UP THE GUI =====
-ui = UserInterface(parameters.UI_WIDTH_PX, parameters.UI_HEIGHT_PX,\
-					parameters.UI_MAP_WIDTH_METERS, parameters.UI_MAP_HEIGHT_METERS,\
-					"images/background.png")
+ui = UserInterface(parameters.UI_MONITORSIZE, parameters.UI_MAPSIZE,\
+			"images/background.png", active_ibeacons)
+# add in the transmitters
+for MajMin in active_ibeacons:
+	b = active_ibeacons[MajMin]
+	ui.addTransmitter(b.getMajor(), b.getMinor(), b.getPos(), "images/transmitter.png")
 ui.start()
