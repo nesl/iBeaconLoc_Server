@@ -42,6 +42,6 @@ class Beacon:
 		return estimator.rxPowerToDistance(self.txpow, self.rssi)
 
 	def __str__(self):
-		return "Beacon from major (%d) and minor (%d) with RSSI (%d of %d) @ t=%f" % \
-				(self.major, self.minor, self.rssi, self.txpow, self.time)
+		return "Beacon from major (%d) and minor (%d) with RSSI (%d of %d), d_est = %.1f" % \
+				(self.major, self.minor, self.rssi, self.txpow, self.getDistEst())
 

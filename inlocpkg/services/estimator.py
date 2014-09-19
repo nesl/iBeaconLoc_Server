@@ -5,9 +5,13 @@ from scipy.optimize import leastsq
 #from pylab import *
 
 
+# settings to power consumption estimation
+def estimatePowerConsumption(beaconPower, beaconTxRate):
+	pass
+
 # Rx power vs. distance model
 def rxPowerToDistance(txpow,rxpow):
-	p0 = 83
+	p0 = 70
 	p1 = 2.7
 	return pow(10, -(rxpow + p0)/(10*p1) )
 
@@ -24,6 +28,7 @@ class PositionEstimator(object):
 		self.lowpassCoeff = lowpassCoeff
 
 	def getNextEstimate(self, user):
+		print(" --- User " + str(user.getUid()) + " getting new estimate: ---" )
 		# if the user's beacon cache is empty, we can't do anything
 		if len(user.beacon_cache) == 0:
 			return
@@ -37,6 +42,8 @@ class PositionEstimator(object):
 				# running average of RSSI
 				observedBeacons[MajMin].avgRssi(b.getRssi())
 		# make sure we have enough unique beacons to get a good new estimate
+		for MajMin in observedBeacons:
+			print("     >  " + str(observedBeacons[MajMin]))
 		if len(observedBeacons) < 3:
 			return
 
@@ -45,6 +52,7 @@ class PositionEstimator(object):
 		xy_guess = (numpy.mean([x for x,y in xy_observedBeacons]), numpy.mean([y for x,y in xy_observedBeacons]))
 		# Now we'll find the instantaneous estimation based on the cached beacon information
 		xy_inst = leastsq(self.lsqrError, xy_guess, args=(observedBeacons))
+		print("          pos: " + str(xy_inst[0][0]) + "," + str(xy_inst[0][1]))
 		return (xy_inst[0][0], xy_inst[0][1])
 		
 	def lsqrError(self, xy, observedBeacons):
@@ -57,4 +65,27 @@ class PositionEstimator(object):
 		# calculate difference between measured and proposed distances
 		differences = [proposedBeaconDistances[(major,minor)]-measuredBeaconDistances[(major,minor)]\
 									for (major,minor) in observedBeacons]
+		# calculate weights TODO!!!
+		#weights = [1/(dist**self.weighting_exponent) for dist in measuredBeaconDistances]
+
 		return differences
+
+		# calculate weighted errors
+		#weightedErrors = [self.]
+		#return differences
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

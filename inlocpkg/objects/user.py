@@ -24,7 +24,7 @@ class User:
 		self.lastEstimateTime = time.time()
 
 	def getUid(self):
-		return self.identifier
+		return self.uid
 
 	def getPosEstimate(self):
 		if len(self.xy_history) == 0:

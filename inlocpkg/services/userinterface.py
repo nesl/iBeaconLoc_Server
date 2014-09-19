@@ -96,6 +96,7 @@ class UserInterface(threading.Thread):
             print("warning: attempted to add existing uid to UI list")
         else:
             self.user_sprite_list[uid] = self.UserSprite(uid,impath)
+            self.user_sprite_list[uid].setPosition(self.userCoordsToPx((0,0)))
 
     def addTransmitter(self, major, minor, mxy, impath):
         if (major,minor) in self.transmitter_sprite_list:
@@ -182,7 +183,7 @@ class UserInterface(threading.Thread):
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
-            pps = self.managed_users[2].getPowerFilter()
+            power = self.managed_users[2].getPowerFilter()
             temp_str = str(power)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 230))
@@ -205,13 +206,46 @@ class UserInterface(threading.Thread):
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 260))
 
+        # --- draw power consumption frame ---
+        temp_str = "Est. Power Consumption"
+        temp_mod = self.mediumfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 300) )
+        temp_str = "User 1"
+        temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
+        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 340))
+        temp_str = "User 2"
+        temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
+        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 340))
+        temp_str = "Power"
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 370))
+        if 1 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            power = self.managed_users[1].getPowerFilter()
+            temp_str = str(power)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 370))
+        if 2 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            power = self.managed_users[2].getPowerFilter()
+            temp_str = str(power)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 370))
+
+
         # --- draw map frame ---        
         # draw background
         self.screen.blit(self.background,self.mapFrameRect[0:2])
 
         # draw transmitters
         for MajMin in self.transmitter_sprite_list:
-            self.screen.blit(self.transmitter_sprite_list[MajMin].image, self.transmitter_sprite_list[MajMin].xy)
+            xy = self.transmitter_sprite_list[MajMin].xy
+            self.screen.blit(self.transmitter_sprite_list[MajMin].image, xy)
+            minor_str = str(self.transmitter_sprite_list[MajMin].minor)
+            minor = self.smallfont.render(minor_str, True, self.fontColor)
+            self.screen.blit(minor, (xy[0]-20, xy[1]))
 
         # draw users
         for uid in self.user_sprite_list:

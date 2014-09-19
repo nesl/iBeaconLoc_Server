@@ -9,10 +9,9 @@ class Transmitter:
 	xy_pos = (0,0)
 	power = 0
 
-	def __init__(self, pos, major, minor, power):
+	def __init__(self, pos, major, minor):
 		self.major = major
 		self.minor = minor
-		self.power = power
 		self.xy = pos
 
 	def getMajor(self):
@@ -21,9 +20,6 @@ class Transmitter:
 	def getMinor(self):
 		return self.minor
 
-	def getPower(self):
-		return self.power
-
 	def getPos(self):
 		return self.xy
 
@@ -31,6 +27,6 @@ class Transmitter:
 		return np.sqrt( (xy[0] - self.xy[0])**2 + (xy[1] - self.xy[1])**2 )
 
 	def __str__(self):
-		return "Transmitter at (%.1f, %.1f) with Power at (%d), major (%d), and minor (%d)" % \
-				(self.xy[0], self.xy[1], self.power, self.major, self.minor)
+		return "Transmitter at (%.1f, %.1f) with major (%d) and minor (%d)" % \
+				(self.xy[0], self.xy[1], self.major, self.minor)
 

@@ -27,11 +27,10 @@ active_users = {}
 active_ibeacons = {}
 # populate active beacons from parameter file
 for b in parameters.BEACON_INFORMATION:
-	pos = (b[0], b[1])
-	major = b[2]
-	minor = b[3]
-	power = b[4]
-	tx = Transmitter( pos, major, minor, power)
+	major = b[0]
+	minor = b[1]
+	pos = (b[2], b[3])
+	tx = Transmitter( pos, major, minor)
 	print("initializing transmitter: " + str(tx))
 	active_ibeacons[(major, minor)] = tx
 
@@ -43,7 +42,7 @@ ui = None
 def handleClientCmd(socket, cmd, uid, payload):
 	# ensure we have this user in our list
 	if uid not in active_users:
-			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=0, lowpassCoeff=0)
+			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=1, lowpassCoeff=0)
 			active_users[uid] = User(uid, posEstimator)
 			ui.addUser(uid, "images/user_01.png")
 
@@ -53,9 +52,13 @@ def handleClientCmd(socket, cmd, uid, payload):
 			return
 		# client sent a beacon packet to the server
 		major, minor, rssi, txpow = struct.unpack("!hhbb", payload)
+		# if this isn't a beacon we recognize, give a warning and skip it
+		if (major,minor) not in active_ibeacons:
+			print('warning: client sending unrecognized beacon')
+			return
 		# create beacon object
-		beacon = Beacon(major,minor,-rssi,txpow)
-		print("User " + str(uid) + " sent: " + str(beacon))
+		beacon = Beacon(major,minor,rssi,txpow)
+		#print("User " + str(uid) + " sent: " + str(beacon))
 		# make sure we have a record of this user. If not, make a new user with 
 		# a position estimator service
 		
@@ -101,6 +104,10 @@ def performEstimation():
 		active_users[uid].estimateNewPosition()
 		ui.moveUserMeters( uid, active_users[uid].getPosEstimate() )
 
+# ===== FIRE UP THE GUI =====
+ui = UserInterface(parameters.UI_MONITORSIZE, parameters.UI_MAPSIZE,\
+			active_ibeacons, active_users, "images/background.png")
+
 # ===== FIRE UP THE SERVER =====
 server = InlocServer(communication.TCPIP_PORT, handleClientCmd)
 server.start()
@@ -108,9 +115,6 @@ server.start()
 # ===== FIRE UP THE ESTIMATOR =====
 performEstimation()
 
-# ===== FIRE UP THE GUI =====
-ui = UserInterface(parameters.UI_MONITORSIZE, parameters.UI_MAPSIZE,\
-			active_ibeacons, active_users, "images/background.png")
 # add in the transmitters
 for MajMin in active_ibeacons:
 	b = active_ibeacons[MajMin]
