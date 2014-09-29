@@ -12,3 +12,5 @@ UI_MAPSIZE = (9.1, 10.6) # meters
 
 # estimation
 ESTIMATION_PERIOD = 1 # seconds
+WEIGHT_COEFFICIENT = 1.2
+LOWPASS_COEFFICIENT = 0.75

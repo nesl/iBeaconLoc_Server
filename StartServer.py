@@ -42,7 +42,9 @@ ui = None
 def handleClientCmd(socket, cmd, uid, payload):
 	# ensure we have this user in our list
 	if uid not in active_users:
-			posEstimator = PositionEstimator(active_ibeacons, weighting_exponent=1, lowpassCoeff=0)
+			posEstimator = PositionEstimator(active_ibeacons,\
+				weightingExponent=parameters.WEIGHT_COEFFICIENT,\
+				lowPassCoeff=parameters.LOWPASS_COEFFICIENT)
 			active_users[uid] = User(uid, posEstimator)
 			ui.addUser(uid, "images/user_01.png")
 

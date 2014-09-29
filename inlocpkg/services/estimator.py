@@ -16,16 +16,11 @@ def rxPowerToDistance(txpow,rxpow):
 	return pow(10, -(rxpow + p0)/(10*p1) )
 
 class PositionEstimator(object):
-	# estimation variables
-	weightingExponent = 0
-	lowPassCoeff = 0
-	# additional variables
-	iBeaconList = None
 
-	def __init__(self, iBeaconList, weighting_exponent=0, lowpassCoeff=0):
+	def __init__(self, iBeaconList, weightingExponent=0, lowPassCoeff=0):
 		self.iBeaconList = iBeaconList
-		self.weighting_exponent = weighting_exponent
-		self.lowpassCoeff = lowpassCoeff
+		self.weighting_exponent = weightingExponent
+		self.lowPassCoeff = lowPassCoeff
 
 	def getNextEstimate(self, user):
 		print(" --- User " + str(user.getUid()) + " getting new estimate: ---" )
@@ -51,24 +46,34 @@ class PositionEstimator(object):
 		xy_observedBeacons = [self.iBeaconList[(major,minor)].xy for (major,minor) in observedBeacons]
 		xy_guess = (numpy.mean([x for x,y in xy_observedBeacons]), numpy.mean([y for x,y in xy_observedBeacons]))
 		# Now we'll find the instantaneous estimation based on the cached beacon information
-		xy_inst = leastsq(self.lsqrError, xy_guess, args=(observedBeacons))
-		print("          pos: " + str(xy_inst[0][0]) + "," + str(xy_inst[0][1]))
-		return (xy_inst[0][0], xy_inst[0][1])
+		solution = leastsq(self.lsqrError, xy_guess, args=(observedBeacons))
+		xy_inst = (solution[0][0], solution[0][1])
+		
+
+		# we got the instantaneous position, now let's do our low pass filter
+		xy_filt = numpy.add( numpy.multiply(self.lowPassCoeff, user.getPosEstimate()),\
+							 numpy.multiply((1-self.lowPassCoeff), xy_inst) )
+		print("          pos: " + str(xy_filt))
+		return xy_filt
 		
 	def lsqrError(self, xy, observedBeacons):
 		# calculate the proposed distances to the beacons
-		proposedBeaconDistances = {(major,minor):self.iBeaconList[(major,minor)].getDistanceTo(xy)\
-									 for (major,minor) in observedBeacons}
+		proposedBeaconDistances = {MajMin:self.iBeaconList[MajMin].getDistanceTo(xy)\
+									for MajMin in observedBeacons}
 		# calculate the measured distances to the beacons based on RSSI
-		measuredBeaconDistances = {(major,minor):observedBeacons[(major,minor)].getDistEst()\
-									for (major,minor) in observedBeacons}
+		measuredBeaconDistances = {MajMin:observedBeacons[MajMin].getDistEst()\
+									for MajMin in observedBeacons}
 		# calculate difference between measured and proposed distances
-		differences = [proposedBeaconDistances[(major,minor)]-measuredBeaconDistances[(major,minor)]\
-									for (major,minor) in observedBeacons]
-		# calculate weights TODO!!!
-		#weights = [1/(dist**self.weighting_exponent) for dist in measuredBeaconDistances]
+		differences = {MajMin:(proposedBeaconDistances[MajMin]-measuredBeaconDistances[MajMin])\
+									for MajMin in observedBeacons}
+		# calculate weights
+		weights = {MajMin:(1/(measuredBeaconDistances[MajMin]**self.weighting_exponent))\
+									for MajMin in observedBeacons}
 
-		return differences
+		# calculate weighted errors
+		weightedErrors = [weights[MajMin]*differences[MajMin] for MajMin in observedBeacons]
+
+		return weightedErrors
 
 		# calculate weighted errors
 		#weightedErrors = [self.]

@@ -6,11 +6,9 @@ class User:
 	MAX_EST_HISTORY_LEN = 64
 	MAX_BEACON_CACHE_LEN = 256
 	# dynamic variables
-	uid = -1
 	xy_history = []
 	time_history = []
 	beacon_cache = []
-	estimator = None
 	# mobile-based filters
 	powerFilter = 0
 	rateThrottle = 0
@@ -43,15 +41,15 @@ class User:
 		self.beacon_cache.append(beacon)
 
 		if len(self.beacon_cache) > self.MAX_BEACON_CACHE_LEN:
-			self.beacon_cache.pop()
+			self.beacon_cache.pop(0)
 
 	def addPosEstimate(self, xy_new):
 		self.xy_history.append(xy_new)
 		self.time_history.append(time.time())
 
 		if len(self.xy_history) > self.MAX_EST_HISTORY_LEN:
-			self.xy_history.pop()
-			self.time_history.pop()
+			self.xy_history.pop(0)
+			self.time_history.pop(0)
 
 	def estimateNewPosition(self):
 		timeSinceLastEst = time.time() - self.lastEstimateTime
