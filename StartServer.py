@@ -86,7 +86,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 	if cmd is communication.CMD_CLIENT_SENDSTATE:
 		if len(payload) is not communication.CMD_CLIENT_SENDSTATE_PAYLOAD:
 			return
-		power, rate = struct.unpack("!BB", payload)[0]
+		power, rate = struct.unpack("!bb", payload)
 		active_users[uid].setPowerFilter(-power)
 		active_users[uid].setRateThrottle(rate)
 		print("User " + str(uid) + " set power to " + str(power) + " and rate to " + str(rate))
