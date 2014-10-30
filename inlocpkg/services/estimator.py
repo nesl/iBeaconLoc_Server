@@ -3,17 +3,50 @@ import numpy
 from numpy import linalg
 from scipy.optimize import leastsq
 #from pylab import *
-
+from ..constants import parameters
 
 # settings to power consumption estimation
 def estimatePowerConsumption(beaconPower, beaconTxRate):
-	pass
+	idle_pow = 0.07e-3 # watts
+	if beaconPower == parameters.TXPOW_LOW:
+		tx_energy = 0.04e-3 # joules
+	elif beaconPower == parameters.TXPOW_HIGH:
+		tx_energy = 0.084e-3 # joules
+	else:
+		print('   WARNING: txpow unrecognized (' + str(beaconPower) +\
+			  '), power est. may be inaccurate')
+		tx_energy = 0.084e-3 # joules (default)
+
+	# estimate power consumption (in Watts)
+	pow_cons = idle_pow + beaconTxRate*tx_energy
+	return pow_cons
+
+def estimateLifetimeYears(batteryCapacity, powerConsumption):
+	# capacity should be in Watt*Hours
+	lifetime_hours = batteryCapacity/powerConsumption
+	return lifetime_hours/(24.0*365.25)
+
 
 # Rx power vs. distance model
 def rxPowerToDistance(txpow,rxpow):
-	p0 = 70
-	p1 = 2.7
-	return pow(10, -(rxpow + p0)/(10*p1) )
+	# currently runs a switch case on txpow to switch models
+	if txpow == parameters.TXPOW_LOW:
+		p0 = -0.1098
+		p1 = -8.4295
+		p2 = -0.3479
+	elif txpow == parameters.TXPOW_HIGH:
+		p0 = -0.1009
+		p1 = -6.1034
+		p2 = -0.4164
+	else:
+		print('   WARNING: txpow unrecognized (' + str(txpow) + \
+			  '), model may be inaccurate')
+		# default params (high):
+		p0 = -0.1009
+		p1 = -6.1034
+		p2 = -0.4164
+
+	return numpy.exp(p0*rxpow + p1) + p2
 
 class PositionEstimator(object):
 

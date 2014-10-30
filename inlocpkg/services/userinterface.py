@@ -4,6 +4,8 @@ import time
 import random
 import serial
 import threading
+from ..constants import parameters
+from .estimator import *
 
 class UserInterface(threading.Thread):
 
@@ -209,30 +211,57 @@ class UserInterface(threading.Thread):
         # --- draw power consumption frame ---
         temp_str = "Est. Power Consumption"
         temp_mod = self.mediumfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 300) )
+        self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 340) )
         temp_str = "User 1"
         temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
-        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 340))
+        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 380))
         temp_str = "User 2"
         temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
-        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 340))
-        temp_str = "Power"
+        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 380))
+        temp_str = "P(mW)"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 370))
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 410))
         if 1 not in self.managed_users:
             temp_str = "n/a"
         else:
-            power = self.managed_users[1].getPowerFilter()
-            temp_str = str(power)
+            power1 = estimatePowerConsumption(self.managed_users[1].getPowerFilter(), \
+                                          self.managed_users[1].getRateThrottle() )
+            power1_ma = round(1000*power1, 2)
+            temp_str = str(power1_ma)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 370))
+        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 410))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
-            power = self.managed_users[2].getPowerFilter()
-            temp_str = str(power)
+            power2 = estimatePowerConsumption(self.managed_users[2].getPowerFilter(), \
+                                          self.managed_users[2].getRateThrottle() )
+            power2_ma = round(1000*power2,2)
+            temp_str = str(power2_ma)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 370))
+        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 410))
+
+        temp_str = "Years"
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 440))
+        if 1 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            life = estimateLifetimeYears(parameters.BATTERYCAP_2AA, power1)
+            life = round(life,2)
+            temp_str = str(life)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 440))
+        if 2 not in self.managed_users:
+            temp_str = "n/a"
+        else:
+            life = estimateLifetimeYears(parameters.BATTERYCAP_2AA, power1)
+            life = round(life,2)
+            temp_str = str(life)
+        temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
+        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 440))
+
+
+        #life_est = estimateLifetimeMonths( BATTERYCAP_2AA, pow_est)
 
 
         # --- draw map frame ---        

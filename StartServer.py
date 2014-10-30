@@ -87,7 +87,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		if len(payload) is not communication.CMD_CLIENT_SENDSTATE_PAYLOAD:
 			return
 		power, rate = struct.unpack("!bb", payload)
-		active_users[uid].setPowerFilter(-power)
+		active_users[uid].setPowerFilter(power)
 		active_users[uid].setRateThrottle(rate)
 		print("User " + str(uid) + " set power to " + str(power) + " and rate to " + str(rate))
 		
@@ -99,6 +99,11 @@ def performEstimation():
 	for uid in active_users:
 		active_users[uid].estimateNewPosition()
 		ui.moveUserMeters( uid, active_users[uid].getPosEstimate() )
+		# update user stats
+		#pow_est = estimatePowerConsumption(active_users[uid].getPowerFilter(), \
+		#								   active_users[uid].getRateThrottle() )
+		#life_est = estimateLifetimeMonths( BATTERYCAP_2AA, pow_est)
+		#ui.updateUserStats( uid, pow_est, life_est )
 
 # ===== FIRE UP THE GUI =====
 ui = UserInterface(parameters.UI_MONITORSIZE, parameters.UI_MAPSIZE,\

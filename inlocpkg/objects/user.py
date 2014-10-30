@@ -1,5 +1,6 @@
 # IMPORTS
 import time
+from ..constants import parameters
 
 class User:
 	# constants
@@ -20,6 +21,9 @@ class User:
 		self.uid = uid
 		self.estimator = estimator
 		self.lastEstimateTime = time.time()
+		# default state
+		self.powerFilter = parameters.TXPOW_HIGH
+		self.rateThrottle = 10
 
 	def getUid(self):
 		return self.uid
