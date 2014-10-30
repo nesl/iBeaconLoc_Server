@@ -52,6 +52,7 @@ class UserInterface(threading.Thread):
         self.fontColor = (0,0,0)
         self.user1Color = (0,0,255)
         self.user2Color = (255,0,0)
+        self.fullscreen = False
 
 
         # --- background ---
@@ -79,7 +80,7 @@ class UserInterface(threading.Thread):
                 # key press
                 if event.type == pygame.KEYDOWN:
                     pass
-                    #if event.key == pygame.K_q:
+                    #if event.key == pygame.K_f:
 
                 # check for UI exit
                 if event.type == pygame.QUIT:
@@ -140,10 +141,10 @@ class UserInterface(threading.Thread):
         self.screen.blit(temp_mod, (10, self.statsFrameRect[1]) )
         temp_str = "User 1"
         temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
-        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 40))
+        self.screen.blit(temp_mod, (160, self.statsFrameRect[1] + 40))
         temp_str = "User 2"
         temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
-        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 40))
+        self.screen.blit(temp_mod, (300, self.statsFrameRect[1] + 40))
         temp_str = "PPS"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 70))
@@ -153,14 +154,14 @@ class UserInterface(threading.Thread):
             pps = self.managed_users[1].getPacketsPerSec()
             temp_str = "{:.1f}".format(pps) 
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 70))
+        self.screen.blit(temp_mod, (180, self.statsFrameRect[1] + 70))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
             pps = self.managed_users[2].getPacketsPerSec()
             temp_str = "{:.1f}".format(pps) 
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 70))
+        self.screen.blit(temp_mod, (320, self.statsFrameRect[1] + 70))
 
         # --- draw user preferences frame ---
         temp_str = "User Settings"
@@ -168,10 +169,10 @@ class UserInterface(threading.Thread):
         self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 160) )
         temp_str = "User 1"
         temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
-        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 200))
+        self.screen.blit(temp_mod, (160, self.statsFrameRect[1] + 200))
         temp_str = "User 2"
         temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
-        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 200))
+        self.screen.blit(temp_mod, (300, self.statsFrameRect[1] + 200))
         temp_str = "Power"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 230))
@@ -181,14 +182,14 @@ class UserInterface(threading.Thread):
             power = self.managed_users[1].getPowerFilter()
             temp_str = str(power)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 230))
+        self.screen.blit(temp_mod, (180, self.statsFrameRect[1] + 230))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
             power = self.managed_users[2].getPowerFilter()
             temp_str = str(power)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 230))
+        self.screen.blit(temp_mod, (320, self.statsFrameRect[1] + 230))
 
         temp_str = "Rate"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
@@ -199,14 +200,14 @@ class UserInterface(threading.Thread):
             rate = self.managed_users[1].getRateThrottle()
             temp_str = str(rate)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 260))
+        self.screen.blit(temp_mod, (180, self.statsFrameRect[1] + 260))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
             rate = self.managed_users[2].getRateThrottle()
             temp_str = str(rate)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 260))
+        self.screen.blit(temp_mod, (320, self.statsFrameRect[1] + 260))
 
         # --- draw power consumption frame ---
         temp_str = "Est. Power Consumption"
@@ -214,11 +215,11 @@ class UserInterface(threading.Thread):
         self.screen.blit(temp_mod, (10, self.statsFrameRect[1] + 340) )
         temp_str = "User 1"
         temp_mod = self.smallfont.render(temp_str, True, self.user1Color)
-        self.screen.blit(temp_mod, (120, self.statsFrameRect[1] + 380))
+        self.screen.blit(temp_mod, (160, self.statsFrameRect[1] + 380))
         temp_str = "User 2"
         temp_mod = self.smallfont.render(temp_str, True, self.user2Color)
-        self.screen.blit(temp_mod, (260, self.statsFrameRect[1] + 380))
-        temp_str = "P(mW)"
+        self.screen.blit(temp_mod, (300, self.statsFrameRect[1] + 380))
+        temp_str = "Pow. (mW)"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 410))
         if 1 not in self.managed_users:
@@ -229,7 +230,7 @@ class UserInterface(threading.Thread):
             power1_ma = round(1000*power1, 2)
             temp_str = str(power1_ma)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 410))
+        self.screen.blit(temp_mod, (180, self.statsFrameRect[1] + 410))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
@@ -238,9 +239,9 @@ class UserInterface(threading.Thread):
             power2_ma = round(1000*power2,2)
             temp_str = str(power2_ma)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 410))
+        self.screen.blit(temp_mod, (320, self.statsFrameRect[1] + 410))
 
-        temp_str = "Years"
+        temp_str = "Life (yrs)"
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
         self.screen.blit(temp_mod, (20, self.statsFrameRect[1] + 440))
         if 1 not in self.managed_users:
@@ -250,15 +251,15 @@ class UserInterface(threading.Thread):
             life = round(life,2)
             temp_str = str(life)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (140, self.statsFrameRect[1] + 440))
+        self.screen.blit(temp_mod, (180, self.statsFrameRect[1] + 440))
         if 2 not in self.managed_users:
             temp_str = "n/a"
         else:
-            life = estimateLifetimeYears(parameters.BATTERYCAP_2AA, power1)
+            life = estimateLifetimeYears(parameters.BATTERYCAP_2AA, power2)
             life = round(life,2)
             temp_str = str(life)
         temp_mod = self.smallfont.render(temp_str, True, self.fontColor)
-        self.screen.blit(temp_mod, (280, self.statsFrameRect[1] + 440))
+        self.screen.blit(temp_mod, (320, self.statsFrameRect[1] + 440))
 
 
         #life_est = estimateLifetimeMonths( BATTERYCAP_2AA, pow_est)
