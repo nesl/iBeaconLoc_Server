@@ -60,7 +60,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 			return
 		# create beacon object
 		beacon = Beacon(major,minor,rssi,txpow)
-		#print("User " + str(uid) + " sent: " + str(beacon))
+		print("User " + str(uid) + " sent: " + str(beacon))
 		# make sure we have a record of this user. If not, make a new user with 
 		# a position estimator service
 		

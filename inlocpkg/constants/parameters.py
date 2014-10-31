@@ -1,8 +1,10 @@
 # ===== BEACON SETUP =====
 # major, minor, x, y
-BEACON_INFORMATION = ( (4, 1, 6, 0.5),
-					   (4, 2, 6.70, 4.0),
-					   (4, 3, 3.2, 2.5))
+BEACON_INFORMATION = ( (4, 0, 7.5, 0.25),
+					   (4, 1, 0.25, 2.5),
+					   (4, 2, 0.25, 8.0),
+					   (4, 3, 7.25, 10.6),
+					   (4, 4, 7.25, 4.1))
 
 # user interfacegonna 
 UI_MONITORSIZE = (1280,980) # pixels
