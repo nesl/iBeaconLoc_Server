@@ -53,7 +53,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 		if len(payload) is not communication.CMD_CLIENT_SENDBEACON_PAYLOAD:
 			return
 		# client sent a beacon packet to the server
-		major, minor, rssi, txpow = struct.unpack("!hhbb", payload)
+		major, minor, rssi, txpow = payload
 		# if this isn't a beacon we recognize, give a warning and skip it
 		if (major,minor) not in active_ibeacons:
 			print('warning: client sending unrecognized beacon')
@@ -76,8 +76,8 @@ def handleClientCmd(socket, cmd, uid, payload):
 			xy_latest = active_users[uid].getPosEstimate()
 		# send latest xy to user
 		print("User " + str(uid) + " requesting pos., sending: " + str(xy_latest))
-		response = struct.pack("!ff", xy_latest[0], xy_latest[1])
-		socket.request.sendall(response)
+		response =  str(xy_latest[0]) + "," + str(xy_latest[1])
+		#socket.request.sendall(response)
 
 	if cmd is communication.CMD_CLIENT_REQUESTPATH:
 		# currently unhandled
@@ -86,7 +86,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 	if cmd is communication.CMD_CLIENT_SENDSTATE:
 		if len(payload) is not communication.CMD_CLIENT_SENDSTATE_PAYLOAD:
 			return
-		power, rate = struct.unpack("!bb", payload)
+		power, rate = payload
 		active_users[uid].setPowerFilter(power)
 		active_users[uid].setRateThrottle(rate)
 		print("User " + str(uid) + " set power to " + str(power) + " and rate to " + str(rate))
