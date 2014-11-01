@@ -12,13 +12,14 @@ class Beacon:
 	time = 0
 	rxnum = 1
 
-	def __init__(self, major, minor, rssi, txpow):
+	def __init__(self, client, major, minor, rssi, txpow):
 		self.major = major
 		self.minor = minor
 		self.rssi = rssi
 		self.txpow = txpow
 		# time this beacon was received
 		self.time = time.time()
+		self.client = client
 
 	def getMajor(self):
 		return self.major
@@ -39,7 +40,7 @@ class Beacon:
 		self.rxnum = numnew
 
 	def getDistEst(self):
-		return estimator.rxPowerToDistance(self.txpow, self.rssi)
+		return estimator.rxPowerToDistance(self.txpow, self.rssi, self.client)
 
 	def __str__(self):
 		return "Beacon from major (%d) and minor (%d) with RSSI (%d of %d), d_est = %.1f" % \

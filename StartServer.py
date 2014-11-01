@@ -64,8 +64,8 @@ def handleClientCmd(socket, cmd, uid, payload):
 			print('warning: client sending unrecognized beacon')
 			return
 		# create beacon object
-		beacon = Beacon(major,minor,rssi,txpow)
-		#print("User " + str(uid) + " sent: " + str(beacon))
+		beacon = Beacon(uid, major,minor,rssi,txpow)
+		print("User " + str(uid) + " sent: " + str(beacon))
 		# make sure we have a record of this user. If not, make a new user with 
 		# a position estimator service
 		

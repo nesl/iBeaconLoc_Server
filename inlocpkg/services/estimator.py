@@ -28,28 +28,48 @@ def estimateLifetimeYears(batteryCapacity, powerConsumption):
 
 
 # Rx power vs. distance model
-def rxPowerToDistance(txpow,rxpow):
+def rxPowerToDistance(txpow,rxpow, id):
 	# currently runs a switch case on txpow to switch models
-	if txpow == parameters.TXPOW_LOW:
-		p0 = -0.1086
-		p1 = -8.7074
-		p2 = -0.3720
-	elif txpow == parameters.TXPOW_HIGH:
-		#p0 = -0.0873
-		#p1 = -5.4624
-		#p2 = -0.4738
-		p0 = -0.0873
-		p1 = -5.4624
-		p2 = -0.4738
+	# =============== CLIENT 2 =================
+	if id == 2:
+		if txpow == parameters.TXPOW_LOW:
+			p0 = -0.1086
+			p1 = -9.00
+			p2 = -0.3720
+		elif txpow == parameters.TXPOW_HIGH:
+			#p0 = -0.0873
+			#p1 = -5.4624
+			#p2 = -0.4738
+			p0 = -0.0873
+			p1 = -5.7200
+			p2 = -0.4738
+		else:
+			print('   WARNING: txpow unrecognized (' + str(txpow) + \
+				  '), model may be inaccurate')
+			# default params (high):
+			p0 = -0.0873
+			p1 = -5.4624
+			p2 = -0.4738
 	else:
-		print('   WARNING: txpow unrecognized (' + str(txpow) + \
-			  '), model may be inaccurate')
-		# default params (high):
-		p0 = -0.0873
-		p1 = -5.4624
-		p2 = -0.4738
+	# =============== CLIENT 1 =================
+		if txpow == parameters.TXPOW_LOW:
+			p0 = -0.1038
+			p1 = -7.3010
+			p2 = -0.7042
+		elif txpow == parameters.TXPOW_HIGH:
+			p0 = -0.0920
+			p1 = -4.7989
+			p2 = -0.2779
+		else:
+			print('   WARNING: txpow unrecognized (' + str(txpow) + \
+				  '), model may be inaccurate')
+			# default params (high):
+			p0 = -0.0920
+			p1 = -4.7989
+			p2 = -0.2779
 
-	return numpy.exp(p0*rxpow + p1) + p2
+	dist_est = max(0.10, numpy.exp(p0*rxpow + p1) + p2)
+	return dist_est
 
 class PositionEstimator(object):
 
@@ -74,7 +94,7 @@ class PositionEstimator(object):
 				observedBeacons[MajMin].avgRssi(b.getRssi())
 		# make sure we have enough unique beacons to get a good new estimate
 		for MajMin in observedBeacons:
-			print("     >  " + str(observedBeacons[MajMin]))
+			#print("     >  " + str(observedBeacons[MajMin]))
 			pass
 		if len(observedBeacons) < 3:
 			return
@@ -109,9 +129,9 @@ class PositionEstimator(object):
 		# calculate difference between measured and proposed distances
 		differences = {MajMin:(proposedBeaconDistances[MajMin]-measuredBeaconDistances[MajMin])\
 									for MajMin in observedBeacons}
-		# calculate weights
-		weights = {MajMin:(1/(measuredBeaconDistances[MajMin]**self.weighting_exponent))\
-									for MajMin in observedBeacons}
+		# calculate weights (max at 1)
+		weights = {MajMin:( min(100, 1/(measuredBeaconDistances[MajMin]**self.weighting_exponent)) )\
+									for MajMin in observedBeacons} 
 
 		# calculate weighted errors
 		weightedErrors = [weights[MajMin]*differences[MajMin] for MajMin in observedBeacons]
