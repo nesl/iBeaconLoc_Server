@@ -37,28 +37,37 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	# function for handling new connections
 	def handle(self):
-		# only deal with 
-		#print("Client connected from " + str(self.client_address))
-		# parse incoming data
-		data = self.request.recv(1024)
-		# initial check for bad data
-		if len(data)< 2:
-			return
-		# decode this data as UTF-8
-		data_ascii = data.decode("UTF-8")
-		#print('received (ascii): ' + data_ascii)
-		# this is ascii data now, CSV. split up
-		values = [int(strval) for strval in data_ascii.split(',')]
-		# packets contain at least command type and user id
-		if len(values) < 2:
-			return
+		print("Client connected from " + str(self.client_address))		
+		while True:
+			# parse incoming data
+			data = self.request.recv(1024)
+			if not data: 
+				break
+			# decode this data as UTF-8
+			#try:
+			data_ascii = data.decode("UTF-8")
+			#print(' --- read --- : ' + str(data_ascii))
+			# we could've gotten multiple packets here, break them up
+			packets = data_ascii.split('\n')
+			for packet in packets:
+				if len(packet) < 2:
+					continue
+				#print('received (ascii): ' + packet)
+				# this is ascii data now, CSV. split up
+				values = [int(strval) for strval in packet.split(',')]
+				# packets contain at least command type and user id
+				if len(values) < 2:
+					return
 
-		cmd = values[0]
-		uid = values[1]
-		payload = values[2:]
-		# handle command appropriately
-		self.inlocCmdHandler(self,cmd,uid,payload)
-		#print("Client exited from " + str(self.client_address))
+				cmd = values[0]
+				uid = values[1]
+				payload = values[2:]
+				# handle command appropriately
+				self.inlocCmdHandler(self,cmd,uid,payload)
+			#except:
+			#	pass
+			
+		print("Client exited from " + str(self.client_address))
 		self.request.close()
 
 

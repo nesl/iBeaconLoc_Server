@@ -60,7 +60,7 @@ def handleClientCmd(socket, cmd, uid, payload):
 			return
 		# create beacon object
 		beacon = Beacon(major,minor,rssi,txpow)
-		print("User " + str(uid) + " sent: " + str(beacon))
+		#print("User " + str(uid) + " sent: " + str(beacon))
 		# make sure we have a record of this user. If not, make a new user with 
 		# a position estimator service
 		
@@ -76,8 +76,8 @@ def handleClientCmd(socket, cmd, uid, payload):
 			xy_latest = active_users[uid].getPosEstimate()
 		# send latest xy to user
 		print("User " + str(uid) + " requesting pos., sending: " + str(xy_latest))
-		response =  str(xy_latest[0]) + "," + str(xy_latest[1])
-		#socket.request.sendall(response)
+		response =  str(xy_latest[0]) + "," + str(xy_latest[1]) + "\n"
+		socket.request.sendall(response.encode('utf-8'))
 
 	if cmd is communication.CMD_CLIENT_REQUESTPATH:
 		# currently unhandled
