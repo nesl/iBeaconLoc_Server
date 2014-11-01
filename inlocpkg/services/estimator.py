@@ -31,20 +31,23 @@ def estimateLifetimeYears(batteryCapacity, powerConsumption):
 def rxPowerToDistance(txpow,rxpow):
 	# currently runs a switch case on txpow to switch models
 	if txpow == parameters.TXPOW_LOW:
-		p0 = -0.1098
-		p1 = -8.4295
-		p2 = -0.3479
+		p0 = -0.1086
+		p1 = -8.7074
+		p2 = -0.3720
 	elif txpow == parameters.TXPOW_HIGH:
-		p0 = -0.1009
-		p1 = -6.1034
-		p2 = -0.4164
+		#p0 = -0.0873
+		#p1 = -5.4624
+		#p2 = -0.4738
+		p0 = -0.0873
+		p1 = -5.4624
+		p2 = -0.4738
 	else:
 		print('   WARNING: txpow unrecognized (' + str(txpow) + \
 			  '), model may be inaccurate')
 		# default params (high):
-		p0 = -0.1009
-		p1 = -6.1034
-		p2 = -0.4164
+		p0 = -0.0873
+		p1 = -5.4624
+		p2 = -0.4738
 
 	return numpy.exp(p0*rxpow + p1) + p2
 
@@ -72,6 +75,7 @@ class PositionEstimator(object):
 		# make sure we have enough unique beacons to get a good new estimate
 		for MajMin in observedBeacons:
 			print("     >  " + str(observedBeacons[MajMin]))
+			pass
 		if len(observedBeacons) < 3:
 			return
 
@@ -86,7 +90,13 @@ class PositionEstimator(object):
 		# we got the instantaneous position, now let's do our low pass filter
 		xy_filt = numpy.add( numpy.multiply(self.lowPassCoeff, user.getPosEstimate()),\
 							 numpy.multiply((1-self.lowPassCoeff), xy_inst) )
-		print("          pos: " + str(xy_filt))
+
+		# ensure new location is within bounds
+		xy_filt[0] = max( 0, min(xy_filt[0], parameters.UI_MAPSIZE[0]))
+		xy_filt[1] = max( 0, min(xy_filt[1], parameters.UI_MAPSIZE[1]))
+
+		#print("          inst: " + str(user.getPosEstimate()) + "-->" + str(xy_inst) + ", filt: " + str(xy_filt))
+		print("      pos (filt): " + str(xy_filt))
 		return xy_filt
 		
 	def lsqrError(self, xy, observedBeacons):

@@ -3,19 +3,6 @@ import time
 from ..constants import parameters
 
 class User:
-	# constants
-	MAX_EST_HISTORY_LEN = 64
-	MAX_BEACON_CACHE_LEN = 256
-	# dynamic variables
-	xy_history = []
-	time_history = []
-	beacon_cache = []
-	# mobile-based filters
-	powerFilter = 0
-	rateThrottle = 0
-	# reception statistics
-	packetsPerSec = 0
-	lastEstimateTime = 0
 
 	def __init__(self,uid,estimator):
 		self.uid = uid
@@ -24,6 +11,20 @@ class User:
 		# default state
 		self.powerFilter = parameters.TXPOW_HIGH
 		self.rateThrottle = 10
+
+		# constants
+		self.MAX_EST_HISTORY_LEN = 64
+		self.MAX_BEACON_CACHE_LEN = 256
+		# dynamic variables
+		self.xy_history = []
+		self.time_history = []
+		self.beacon_cache = []
+		# mobile-based filters
+		self.powerFilter = -74
+		self.rateThrottle = 20
+		# reception statistics
+		self.packetsPerSec = 0
+		self.lastEstimateTime = 0
 
 	def getUid(self):
 		return self.uid

@@ -25,6 +25,7 @@ print("===============================================")
 # ===== LIST OF ACTIVE USERS & BEACONS =====
 active_users = {}
 active_ibeacons = {}
+user_images = ['user_01.png', 'user_02.png']
 # populate active beacons from parameter file
 for b in parameters.BEACON_INFORMATION:
 	major = b[0]
@@ -46,7 +47,11 @@ def handleClientCmd(socket, cmd, uid, payload):
 				weightingExponent=parameters.WEIGHT_COEFFICIENT,\
 				lowPassCoeff=parameters.LOWPASS_COEFFICIENT)
 			active_users[uid] = User(uid, posEstimator)
-			ui.addUser(uid, "images/user_01.png")
+			if (uid-1) not in  range(len(user_images)):
+				ui.addUser(uid, "images/"+user_images[0])
+			else:
+				ui.addUser(uid, "images/"+user_images[uid-1])
+
 
 	# switch on command type
 	if cmd is communication.CMD_CLIENT_SENDBEACON:
