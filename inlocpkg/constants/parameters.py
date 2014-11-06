@@ -1,15 +1,13 @@
 # ===== BEACON SETUP =====
 # major, minor, x, y
-BEACON_INFORMATION = ( (4, 0, 7.5, 0.25),
-					   (4, 1, 0.25, 2.5),
-					   (4, 2, 0.25, 8.0),
-					   (4, 3, 7.00, 10.5),
-					   (4, 4, 7.25, 4.1),
-					   (4, 5, 5.5, 6.75))
+BEACON_INFORMATION = ((4, 4, 1.29, 2.80),
+					  (4, 5, 6.00, 2.80),
+					  (4, 1, 8.8, 8.0),
+					  (4, 2, 1.29, 8.2))
 
 # user interfacegonna 
 UI_MONITORSIZE = (1280,980) # pixels
-UI_MAPSIZE = (9.1, 10.6) # meters
+UI_MAPSIZE = (9.14, 9.14) # meters
 
 # estimation
 ESTIMATION_PERIOD = 1.0 # seconds

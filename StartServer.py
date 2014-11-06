@@ -112,7 +112,7 @@ def performEstimation():
 
 # ===== FIRE UP THE GUI =====
 ui = UserInterface(parameters.UI_MONITORSIZE, parameters.UI_MAPSIZE,\
-			active_ibeacons, active_users, "images/background.png")
+			active_ibeacons, active_users, "images/layout.png")
 
 # ===== FIRE UP THE SERVER =====
 server = InlocServer(communication.TCPIP_PORT, handleClientCmd)
